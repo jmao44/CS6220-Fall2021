@@ -1,0 +1,6 @@
+Hello, Hadoop!
+Hello, hadoop world.
+Hello World, Hadoop.
+Welcome to Hadoop world.
+Hadoop is fun.
+This is a HelloWorld program for Hadoop.
