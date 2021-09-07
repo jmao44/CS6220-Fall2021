@@ -16,11 +16,22 @@
   - pride/ - full text of Pride and Prejudice
 - misc/ - miscellaneous files
   - patterns.txt - patterns to be ignored
+- outputs/ - outputs of the MapReduce program
 - results_on_20_files/ - results of getting the top 100 words from 20 files
-  - 20_files_word_frequency.txt - results from the first MapReduce job which counts word frequencies in 20 files
-  - top_100_words.txt - results from the second MapReduce job which sorts the result from the first MapReduce job and gets the top 100 entries
+  - word_frequency_initial.txt - results from the first MapReduce job which counts word frequencies in 20 files
+  - word_frequency_sorted.txt - results from the second MapReduce job which sorts the result from the first MapReduce job
+  - top_100_words.txt - final results after selecting the top 100 entries from word_frequency_sorted.txt
 - screenshots/ - screenshots of output log when running MapReduce jobs
 - src/ - containing source files
+  - WordCount.java - depreacated WordCount program
+  - WordCount2.java - the WordCount program used in this assignment
+  - CountTop.java - the program used to sort the results with count as key and word as value
 - word_count_perf.xlsx - Excel file recording the performance of MapReduce on datasets of different size
 - README.md - this file
 - analytical_report.pdf - the analytical report of this assignment
+
+### Running the MapReduce program:
+1. Make sure you have installed and started Hadoop on your machine.
+2. Run the following command in your terminal:
+    - `hadoop jar wc.jar WordCount2 -Dwordcount.case.sensitive=false <input_directory> <output_directory> -skip <file_containing_patterns_to_skip>`
+3. Results will be available in the `<output_directory>` specified above.
