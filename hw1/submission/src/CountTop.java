@@ -1,5 +1,5 @@
-// Code adopted from Apache's official MapReduce tutorial: https://hadoop.apache.org/docs/stable/hadoop-mapreduce-client/hadoop-mapreduce-client-core/MapReduceTutorial.html
 import java.io.IOException;
+import java.lang.Math;
 import java.util.StringTokenizer;
 
 import org.apache.hadoop.conf.Configuration;
@@ -17,38 +17,40 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
 public class CountTop {
 
-  public static class CountTopMapper extends Mapper<LongWritable, Text, IntWritable, Text>{
-    public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
-      String[] pair = value.toString().split("\\s+");
+  public static class CountTopMapper extends Mapper<Object, Text, LongWritable, Text>{
+    
+    @Override
+    public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
+      String[] tokens = value.toString().split("\\s+");
+      
+      String word = tokens[0];
+      long wordCount = Long.parseLong(tokens[1]);
 
-      String word = pair[0];
-      IntWritable count = new IntWritable(Integer.valueOf(pair[1]));
+      wordCount = (-1) * wordCount;
 
-      context.write(count, new Text(word));
+      context.write(new LongWritable(wordCount), new Text(word));
 
     }
   }
 
-  public static class CountTopReducer extends Reducer<IntWritable, Text, IntWritable, Text> {
-    public void reduce(IntWritable key, Text values, Context context) throws IOException, InterruptedException {
+  public static class CountTopReducer extends Reducer<LongWritable, Text, LongWritable, Text> {
 
-      context.write(key, values);
-    }
-  }
-
-  public static class ReverseComparator extends WritableComparator {
-    protected ReverseComparator() {
-      super(IntWritable.class, true);
-    }
-
-    @SuppressWarnings("rawtypes")
+    static int count;
 
     @Override
-    public int compare(WritableComparable w1, WritableComparable w2) {
-      IntWritable i1 = (IntWritable) w1;
-      IntWritable i2 = (IntWritable) w2;
+    public void setup(Context context) throws IOException, InterruptedException {
+      count = 0;
+    }
 
-      return -1 * i1.compareTo(i2);
+    @Override
+    public void reduce(LongWritable key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
+      for (Text val : values) {
+        String word = val.toString();
+        if (count < 100) {
+          context.write(new LongWritable(Math.abs(key.get())), new Text(word));
+          count++;
+        }
+      }
     }
   }
 
@@ -60,10 +62,8 @@ public class CountTop {
     job.setMapperClass(CountTopMapper.class);
     job.setCombinerClass(CountTopReducer.class);
     job.setReducerClass(CountTopReducer.class);
-
-    job.setSortComparatorClass(ReverseComparator.class);
   
-    job.setOutputKeyClass(IntWritable.class);
+    job.setOutputKeyClass(LongWritable.class);
     job.setOutputValueClass(Text.class);
 
     FileInputFormat.addInputPath(job, new Path(args[0]));
